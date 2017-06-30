@@ -20,3 +20,20 @@ type Post struct {
 	UpdatedAt   time.Time `db:"updated_at"`
 	CreatedAt   time.Time `db:"created_at"`
 }
+
+type Image struct {
+	ID 			uuid.UUID 	`db:"id"`
+	UserID 		uuid.UUID 	`db:"user_id"`
+	Url 		string	 	`db:"url"`
+	Medium 		string 		`db:"medium"`
+	Small 		string	 	`db:"small"`
+	Caption 	string	 	`db:"caption"`
+	UpdatedAt 	time.Time 	`db:"updated_at"`
+	CreatedAt 	time.Time 	`db:"created_at"`
+}
+
+type Tag struct {
+	ID			uuid.UUID	`db:"id"`
+	Name		string 		`db:"name"`
+	Slug		string		`db:"slug"`
+}
