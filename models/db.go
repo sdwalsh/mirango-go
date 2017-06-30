@@ -1,7 +1,7 @@
 package models
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 
 	_ "github.com/lib/pq"
 )
@@ -31,18 +31,16 @@ type Datastore interface {
 
 // DB ...
 type DB struct {
-	*sql.DB
+	*sqlx.DB
 }
 
-// NewDB initializes the database connection and returns a new DB struct pointer
+// CreateDB initializes the database connection and returns a new DB struct pointer
 // databaseName is expected to be a PostgreSQL URL
-func NewDB(databaseName string) (*DB, error) {
-	db, err := sql.Open("postgres", databaseName)
+func CreateDB(database string, connectionOptions string) (*DB, error) {
+	db, err := sqlx.Connect("postgres", connectionOptions)
 	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
+
 	return &DB{db}, nil
 }
