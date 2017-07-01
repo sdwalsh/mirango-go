@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
 	_ "github.com/lib/pq"
@@ -27,6 +28,21 @@ copies or substantial portions of the Software.
 // Datastore interface contains all of our functions for the PostgreSQL database
 // this allows us to mock the database during tests!
 type Datastore interface {
+	// User Functions
+	InsertUser(uname string, digest []byte, role string, email string, gpg string) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	GetUserByID(user uuid.UUID) (*User, error)
+	// Post Functions
+	FindPost(id uuid.UUID) (*Post, error)
+	FindPostsByUser(user uuid.UUID) (*[]Post, error)
+	InsertPost(user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)
+	UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)
+	DeletePost(id uuid.UUID) (*Post, error)
+	// Image Functions
+	FindImage(id uuid.UUID) (*Image, error)
+	FindImagesByUser(user uuid.UUID) (*[]Image, error)
+	InsertImage(user uuid.UUID, url string, medium string, small string, caption string) (*Image, error)
+	DeleteImage(id uuid.UUID) (*Image, error)
 }
 
 // DB ...

@@ -10,6 +10,7 @@ import (
 type User struct {
 	ID           uuid.UUID `db:"id"`
 	Uname        string    `db:"uname"`
+	Digest       []byte    `db:"digest"`
 	Role         string    `db:"role"`
 	Email        string    `db:"email"`
 	GpgKey       string    `db:"email"`
