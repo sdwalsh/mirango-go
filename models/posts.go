@@ -39,3 +39,63 @@ type Tag struct {
 	Name string    `db:"name"`
 	Slug string    `db:"slug"`
 }
+
+// FindPost ...
+func (db *DB) FindPost(id uuid.UUID) (*Post, error) {
+	p := new(Post)
+	sql := "SELECT * FROM posts WHERE id = $1"
+	err := db.Get(p, sql, id)
+	return p, err
+}
+
+// FindPostsByUser ...
+func (db *DB) FindPostsByUser(user uuid.UUID) (*[]Post, error) {
+	p := new([]Post)
+	sql := "SELECT * FROM posts WHERE user_id = $1"
+	err := db.Select(p, sql, user)
+	return p, err
+}
+
+// InsertPost ...
+func (db *DB) InsertPost(user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error) {
+	p := new(Post)
+	sql := "INSERT INTO posts (user_id, title, slug, subtitle, short, content, digest, published) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+	err := db.Get(p, sql, user, title, slug, subtitle, short, content, digest, published)
+	return p, err
+}
+
+// UpdatePost ...
+func (db *DB) UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error) {
+	p := new(Post)
+	sql := "UPDATE posts SET (user_id, title, slug, subtitle, short, content, digest, published) VALUES ($2, $3, $4, $5, $6, $7, $8) WHERE id = $1 RETURNING *"
+	err := db.Get(p, sql, id, user, title, slug, subtitle, short, content, digest, published)
+	return p, err
+}
+
+// DeletePost ...
+func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
+	p := new(Post)
+	sql := "DELETE FROM posts WHERE id = $1 RETURNING *"
+	err := db.Get(p, sql, id)
+	return p, err
+}
+
+// FindImage ...
+func (db *DB) FindImage(id uuid.UUID) (*Image, error) {
+
+}
+
+// FindImagesByUser
+func (db *DB) FindImagesByUser(user uuid.UUID) (*[]Image, error) {
+
+}
+
+// InsertImage
+func (db *DB) InsertImage(user uuid.UUID, url string, medium string, small string, caption string) (*Image, error) {
+
+}
+
+//DeleteImage
+func (db *DB) DeleteImage(id uuid.UUID) (*Image, error) {
+
+}
