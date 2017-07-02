@@ -82,20 +82,32 @@ func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
 
 // FindImage ...
 func (db *DB) FindImage(id uuid.UUID) (*Image, error) {
-
+	i := new(Image)
+	sql := "SELECT * FROM images WHERE id = $1"
+	err := db.Get(i, sql, id)
+	return i, err
 }
 
 // FindImagesByUser
 func (db *DB) FindImagesByUser(user uuid.UUID) (*[]Image, error) {
-
+	i := new([]Image)
+	sql := "SELECT * FROM images WHERE user_id = $1"
+	err := db.Select(i, sql, user)
+	return i, err
 }
 
 // InsertImage
 func (db *DB) InsertImage(user uuid.UUID, url string, medium string, small string, caption string) (*Image, error) {
-
+	i := new(Image)
+	sql := "INSERT INTO images (user_id, url, medium, small, caption) VALUES ($1, $2, $3, $4, $5) RETURNING *"
+	err := db.Get(i, sql, user)
+	return i, err
 }
 
 //DeleteImage
 func (db *DB) DeleteImage(id uuid.UUID) (*Image, error) {
-
+	i := new(Image)
+	sql := "DELETE FROM images WHERE id = $1"
+	err := db.Get(i, sql, id)
+	return i, err
 }
