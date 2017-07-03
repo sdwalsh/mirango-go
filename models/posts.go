@@ -88,7 +88,7 @@ func (db *DB) FindImage(id uuid.UUID) (*Image, error) {
 	return i, err
 }
 
-// FindImagesByUser
+// FindImagesByUser returns an slice of images from the database for a given user
 func (db *DB) FindImagesByUser(user uuid.UUID) (*[]Image, error) {
 	i := new([]Image)
 	sql := "SELECT * FROM images WHERE user_id = $1"
@@ -96,7 +96,8 @@ func (db *DB) FindImagesByUser(user uuid.UUID) (*[]Image, error) {
 	return i, err
 }
 
-// InsertImage
+// InsertImage attempts to insert an image into the database provided three sizes of the image (original, medium, and small) return an error
+// if it cannot be added or user reference invalid
 func (db *DB) InsertImage(user uuid.UUID, url string, medium string, small string, caption string) (*Image, error) {
 	i := new(Image)
 	sql := "INSERT INTO images (user_id, url, medium, small, caption) VALUES ($1, $2, $3, $4, $5) RETURNING *"
@@ -104,7 +105,7 @@ func (db *DB) InsertImage(user uuid.UUID, url string, medium string, small strin
 	return i, err
 }
 
-//DeleteImage
+//DeleteImage takes an id of an image and if exists deletes from database returns error if not found
 func (db *DB) DeleteImage(id uuid.UUID) (*Image, error) {
 	i := new(Image)
 	sql := "DELETE FROM images WHERE id = $1"

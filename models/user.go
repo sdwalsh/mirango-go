@@ -20,24 +20,24 @@ type User struct {
 
 // InsertUser ...
 func (db *DB) InsertUser(uname string, digest []byte, role string, email string, gpg string) (*User, error) {
-	var u User
+	u := new(User)
 	sql := "INSERT INTO users (uname, digest, role, email, gpg) VALUES ($1, $2, $3, $4, $5) RETURNING *"
-	err := db.Get(&u, sql, uname, digest, role, email, gpg)
-	return &u, err
+	err := db.Get(u, sql, uname, digest, role, email, gpg)
+	return u, err
 }
 
 // GetUserByEmail ...
 func (db *DB) GetUserByEmail(email string) (*User, error) {
-	var u User
+	u := new(User)
 	sql := "SELECT * FROM users WHERE email = $1"
-	err := db.Get(&u, sql, email)
-	return &u, err
+	err := db.Get(u, sql, email)
+	return u, err
 }
 
 // GetUserByID ...
 func (db *DB) GetUserByID(user uuid.UUID) (*User, error) {
-	var u User
+	u := new(User)
 	sql := "SELECT * FROM users WHERE id = $1"
-	err := db.Get(&u, sql, user)
-	return &u, err
+	err := db.Get(u, sql, user)
+	return u, err
 }
