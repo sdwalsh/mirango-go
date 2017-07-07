@@ -6,4 +6,5 @@ import "github.com/sdwalsh/mirango-go/models"
 type Env struct {
 	DB   models.Datastore
 	hmac []byte
+	salt string
 }
