@@ -96,7 +96,14 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) Logout(w http.ResponseWriter, r *http.Request) {
-
+	// Setting MaxAge to < 0 will delete cookie now
+	cookie := http.Cookie{
+		Name:     "authentication",
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusOK)
 }
 
 // CreateAccount takes user, email, gpg, password, password2 from a form
@@ -122,7 +129,7 @@ func (env *Env) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	// Ignore the user struct returned and report back 409 if error or 200 if ok
+	// Ignore the user struct returned and report back 409 if error or 202 if ok
 	_, err = env.DB.InsertUser(user, digest, "MEMBER", email, gpg)
 	if err != nil {
 		w.WriteHeader(http.StatusConflict)
