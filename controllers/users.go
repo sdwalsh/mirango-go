@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -11,12 +12,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserCustomClaim struct {
+	UUID uuid.UUID `json:"uuid"`
+	jwt.StandardClaims
+}
+
 // Login, Logout, Sign-up
 
+// getUser is a useful function for taking the user claim from the jwt
 func getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error) {
 	u := *new(uuid.UUID)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		return hmacSecret, nil
@@ -51,8 +58,41 @@ func (env *Env) UserCtx(next http.Handler) http.Handler {
 	})
 }
 
+// Login takes a user and password from a login form and checks it against
+// the hashed password in the database sets jwt if accepted
 func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
+	// Clean everything but the password (password is hashed)
+	s := bluemonday.UGCPolicy()
+	uname := s.Sanitize(r.FormValue("user"))
+	password := r.FormValue("password")
+	t := time.Now().Add(time.Hour)
 
+	// Database call and bcrypt compare hashed passwords
+	u, err := env.DB.GetUserByUname(uname)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = bcrypt.CompareHashAndPassword(u.Digest, []byte(password+env.salt))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	// Generate new jwt with uuid claim and add cookie
+	token := jwt.NewWithClaims(jwt.SigningMethodES512, UserCustomClaim{
+		u.ID,
+		jwt.StandardClaims{
+			ExpiresAt: t.Unix(),
+		},
+	})
+	tokenString, err := token.SignedString(env.hmac)
+	cookie := http.Cookie{
+		Name:     "authentication",
+		Value:    tokenString,
+		Expires:  t,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (env *Env) Logout(w http.ResponseWriter, r *http.Request) {

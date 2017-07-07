@@ -41,3 +41,11 @@ func (db *DB) GetUserByID(user uuid.UUID) (*User, error) {
 	err := db.Get(u, sql, user)
 	return u, err
 }
+
+// GetUserByUname ...
+func (db *DB) GetUserByUname(uname string) (*User, error) {
+	u := new(User)
+	sql := "SELECT * FROM users WHERE uname = $1"
+	err := db.Get(u, sql, uname)
+	return u, err
+}

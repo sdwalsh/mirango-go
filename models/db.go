@@ -32,6 +32,7 @@ type Datastore interface {
 	InsertUser(uname string, digest []byte, role string, email string, gpg string) (*User, error)
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(user uuid.UUID) (*User, error)
+	GetUserByUname(uname string) (*User, error)
 	// Post Functions
 	FindPost(id uuid.UUID) (*Post, error)
 	FindPostsByUser(user uuid.UUID) (*[]Post, error)
