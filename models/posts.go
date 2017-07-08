@@ -80,7 +80,7 @@ func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
 	return p, err
 }
 
-// FindImage ...
+// FindImage 
 func (db *DB) FindImage(id uuid.UUID) (*Image, error) {
 	i := new(Image)
 	sql := "SELECT * FROM images WHERE id = $1"

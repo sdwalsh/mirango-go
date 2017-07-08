@@ -12,12 +12,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// UserCustomClaim is the custom claim for user authentication contains a uuid.UUID and jwt.StandardClaims
 type UserCustomClaim struct {
 	UUID uuid.UUID `json:"uuid"`
 	jwt.StandardClaims
 }
-
-// Login, Logout, Sign-up
 
 // getUser is a useful function for taking the user claim from the jwt
 func getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error) {
@@ -95,6 +94,7 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// Logout will delete the authentication cookie
 func (env *Env) Logout(w http.ResponseWriter, r *http.Request) {
 	// Setting MaxAge to < 0 will delete cookie now
 	cookie := http.Cookie{
