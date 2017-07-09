@@ -30,7 +30,7 @@ CREATE TABLE posts (
   published      boolean DEFAULT FALSE,
   updated_at     timestamptz NOT NULL DEFAULT NOW(),
   created_at     timestamptz NOT NULL DEFAULT NOW()
-)
+);
 
 CREATE TABLE images (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -41,18 +41,18 @@ CREATE TABLE images (
   caption        text NOT NULL,
   updated_at     timestamptz NOT NULL DEFAULT NOW(),
   created_at     timestamptz NOT NULL DEFAULT NOW()
-)
+);
 
 CREATE TABLE tags (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name          text NOT NULL,
   slug          text NOT NULL
-)
+);
 
 CREATE TABLE posts_tags (
   post_id       uuid NOT NULL REFERENCES posts(id),
   tag_id        uuid NOT NULL REFERENCES tags(id)
-)
+);
 ------------------------------------------------------------
 ------------------------------------------------------------
 
