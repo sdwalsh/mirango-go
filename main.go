@@ -29,6 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not process environmental variables")
 	}
+
 	// Generate initial key for gorilla/csrf log.Fatal if key generation fails
 	key := make([]byte, 32)
 	_, err = rand.Read(key)

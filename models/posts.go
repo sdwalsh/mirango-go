@@ -40,6 +40,34 @@ type Tag struct {
 	Slug string    `db:"slug"`
 }
 
+////////////////////
+// Post Functions //
+////////////////////
+
+// PublishedPosts returns all published posts in database
+func (db *DB) PublishedPosts() (*[]Post, error) {
+	p := new([]Post)
+	sql := "SELECT * FROM posts WHERE published = true"
+	err := db.Get(p, sql)
+	return p, err
+}
+
+// UnpublishedPosts returns all unpublished posts in database
+func (db *DB) UnpublishedPosts() (*[]Post, error) {
+	p := new([]Post)
+	sql := "SELECT * FROM posts WHERE published = false"
+	err := db.Get(p, sql)
+	return p, err
+}
+
+// AllPosts returns all posts in database
+func (db *DB) AllPosts() (*[]Post, error) {
+	p := new([]Post)
+	sql := "SELECT * FROM posts"
+	err := db.Get(p, sql)
+	return p, err
+}
+
 // FindPost returns the post that matches the uuid
 func (db *DB) FindPost(id uuid.UUID) (*Post, error) {
 	p := new(Post)
@@ -78,6 +106,18 @@ func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
 	sql := "DELETE FROM posts WHERE id = $1 RETURNING *"
 	err := db.Get(p, sql, id)
 	return p, err
+}
+
+/////////////////////
+// Image Functions //
+/////////////////////
+
+// AllImages returns all images in the database
+func (db *DB) AllImages() (*[]Image, error) {
+	i := new([]Image)
+	sql := "SELECT * FROM images"
+	err := db.Get(i, sql)
+	return i, err
 }
 
 // FindImage returns an image from the database for the given uuid
