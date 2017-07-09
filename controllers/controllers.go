@@ -1,10 +1,12 @@
 package controllers
 
 import "github.com/sdwalsh/mirango-go/models"
+import "github.com/gorilla/securecookie"
 
 // Env carries database access to controllers
 type Env struct {
 	DB   models.Datastore
-	hmac []byte
-	salt string
+	S    *securecookie.SecureCookie
+	Hmac []byte
+	Salt string
 }

@@ -19,7 +19,7 @@ type UserCustomClaim struct {
 }
 
 // getUser is a useful function for taking the user claim from the jwt
-func getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error) {
+func (env *Env) getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error) {
 	u := *new(uuid.UUID)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
@@ -71,7 +71,7 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 	}
-	err = bcrypt.CompareHashAndPassword(u.Digest, []byte(password+env.salt))
+	err = bcrypt.CompareHashAndPassword(u.Digest, []byte(password+env.Salt))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -83,7 +83,7 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 			ExpiresAt: t.Unix(),
 		},
 	})
-	tokenString, err := token.SignedString(env.hmac)
+	tokenString, err := token.SignedString(env.Hmac)
 	cookie := http.Cookie{
 		Name:     "authentication",
 		Value:    tokenString,
@@ -124,7 +124,7 @@ func (env *Env) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate the hash if there is an error in hashing we'll return 500
-	digest, err := bcrypt.GenerateFromPassword([]byte(password+env.salt), 10)
+	digest, err := bcrypt.GenerateFromPassword([]byte(password+env.Salt), 10)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/csrf"
+	"github.com/gorilla/securecookie"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -34,6 +35,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Key for CSRF protection could not be generated.")
 	}
+
+	// Setup gorilla/securecookie
+	hashKey := securecookie.GenerateRandomKey(64)
+	blockKey := securecookie.GenerateRandomKey(32)
+	s := securecookie.New(hashKey, blockKey)
 
 	// Create new chi router and add middleware
 	r := chi.NewRouter()
