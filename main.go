@@ -12,12 +12,15 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// Configuration is the struct of all required environmental variables
 type Configuration struct {
 	DatabaseURL string
 	Hmac        string
 	Salt        string
+	Port        string
 }
 
+// Main sets up the server configuration and middleware and start the server
 func main() {
 	// Process environmental configuration
 	var c Configuration
@@ -41,5 +44,5 @@ func main() {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	// Start server and add csrf middleware (32 bit key and chi router)
-	http.ListenAndServe(":3333", csrf.Protect(key)(r))
+	http.ListenAndServe(c.Port, csrf.Protect(key)(r))
 }

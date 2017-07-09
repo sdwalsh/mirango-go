@@ -40,7 +40,7 @@ type Tag struct {
 	Slug string    `db:"slug"`
 }
 
-// FindPost ...
+// FindPost returns the post that matches the uuid
 func (db *DB) FindPost(id uuid.UUID) (*Post, error) {
 	p := new(Post)
 	sql := "SELECT * FROM posts WHERE id = $1"
@@ -48,7 +48,7 @@ func (db *DB) FindPost(id uuid.UUID) (*Post, error) {
 	return p, err
 }
 
-// FindPostsByUser ...
+// FindPostsByUser returns a slice of posts created by the given user
 func (db *DB) FindPostsByUser(user uuid.UUID) (*[]Post, error) {
 	p := new([]Post)
 	sql := "SELECT * FROM posts WHERE user_id = $1"
@@ -56,7 +56,7 @@ func (db *DB) FindPostsByUser(user uuid.UUID) (*[]Post, error) {
 	return p, err
 }
 
-// InsertPost ...
+// InsertPost creates a post for the given user and returns the post
 func (db *DB) InsertPost(user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error) {
 	p := new(Post)
 	sql := "INSERT INTO posts (user_id, title, slug, subtitle, short, content, digest, published) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
@@ -64,7 +64,7 @@ func (db *DB) InsertPost(user uuid.UUID, title string, slug string, subtitle str
 	return p, err
 }
 
-// UpdatePost ...
+// UpdatePost updates a post in the database and returns the updated image
 func (db *DB) UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error) {
 	p := new(Post)
 	sql := "UPDATE posts SET (user_id, title, slug, subtitle, short, content, digest, published) VALUES ($2, $3, $4, $5, $6, $7, $8) WHERE id = $1 RETURNING *"
@@ -72,7 +72,7 @@ func (db *DB) UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string
 	return p, err
 }
 
-// DeletePost ...
+// DeletePost deletes and returns the image from the database that matches the uuid
 func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
 	p := new(Post)
 	sql := "DELETE FROM posts WHERE id = $1 RETURNING *"
@@ -80,7 +80,7 @@ func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
 	return p, err
 }
 
-// FindImage 
+// FindImage returns an image from the database for the given uuid
 func (db *DB) FindImage(id uuid.UUID) (*Image, error) {
 	i := new(Image)
 	sql := "SELECT * FROM images WHERE id = $1"
