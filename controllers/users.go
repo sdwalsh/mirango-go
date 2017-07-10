@@ -9,6 +9,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/sdwalsh/mirango-go/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,6 +18,24 @@ type UserCustomClaim struct {
 	UUID uuid.UUID `json:"uuid"`
 	jwt.StandardClaims
 }
+
+//
+// ContextKey solution to "should not use basic type string as key in context.WithValue"
+// Provided by @matryer
+// https://medium.com/@matryer/context-keys-in-go-5312346a868d
+//
+
+type contextKey string
+
+func (c contextKey) String() string {
+	return "mirango-go/models context key" + string(c)
+}
+
+var (
+	contextSignedIn = contextKey("signed_in")
+	contextUser     = contextKey("user")
+	contextAdmin    = contextKey("admin")
+)
 
 // getUser is a useful function for taking the user claim from the jwt
 func (env *Env) getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error) {
@@ -40,20 +59,45 @@ func (env *Env) getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error
 // UserCtx loads the user into the context if it exists
 func (env *Env) UserCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Context defaults to
+		ctx := context.WithValue(r.Context(), contextSignedIn, false)
+		ctx = context.WithValue(ctx, contextAdmin, false)
 		cookie, err := r.Cookie("authentication")
 		if err != nil {
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		ID, err := uuid.Parse(cookie.Value)
 		if err != nil {
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		user, err := env.DB.GetUserByID(ID)
 		if err != nil {
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
-		ctx := context.WithValue(r.Context(), "user", user)
+		ctx = context.WithValue(r.Context(), contextSignedIn, true)
+		ctx = context.WithValue(ctx, contextUser, user)
+		ctx = context.WithValue(ctx, contextAdmin, true)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// AdminOnly blocks all requests unless from a user with a role of ADMIN
+// assumes user is stored in context (run UserCtx before running this middleware)
+func (env *Env) AdminOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		user, ok := ctx.Value(contextUser).(*models.User)
+		// User was not found, invalid jwt, or not signed in
+		if !ok {
+			http.Error(w, http.StatusText(404), 404)
+			return
+		}
+		// If user is not an admin return unauthorized
+		if user.Role != "ADMIN" {
+			http.Error(w, http.StatusText(401), 401)
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }
 

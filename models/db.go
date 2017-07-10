@@ -34,12 +34,16 @@ type Datastore interface {
 	GetUserByID(user uuid.UUID) (*User, error)
 	GetUserByUname(uname string) (*User, error)
 	// Post Functions
+	PublishedPosts() (*[]Post, error)
+	UnpublishedPosts() (*[]Post, error)
+	AllPosts() (*[]Post, error)
 	FindPost(id uuid.UUID) (*Post, error)
 	FindPostsByUser(user uuid.UUID) (*[]Post, error)
 	InsertPost(user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)
 	UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)
 	DeletePost(id uuid.UUID) (*Post, error)
 	// Image Functions
+	AllImages() (*[]Image, error)
 	FindImage(id uuid.UUID) (*Image, error)
 	FindImagesByUser(user uuid.UUID) (*[]Image, error)
 	InsertImage(user uuid.UUID, url string, medium string, small string, caption string) (*Image, error)
