@@ -41,7 +41,7 @@ type Datastore interface {
 	FindPostsByUser(user uuid.UUID) (*[]Post, error)
 	InsertPost(user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)
 	UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)
-	DeletePost(id uuid.UUID) (*Post, error)
+	DeletePost(id uuid.UUID, user uuid.UUID) (*Post, error)
 	// Image Functions
 	AllImages() (*[]Image, error)
 	FindImage(id uuid.UUID) (*Image, error)

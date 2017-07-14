@@ -8,36 +8,36 @@ import (
 
 // Post struct based on posts table in database
 type Post struct {
-	ID          uuid.UUID `db:"id"`
-	UserID      uuid.UUID `db:"user_id"`
-	Title       string    `db:"title"`
-	Slug        string    `db:"slug"`
-	SubTitle    string    `db:"sub_title"`
-	Short       string    `db:"short"`
-	PostContent string    `db:"post_content"`
-	Digest      string    `db:"digest"`
-	Published   bool      `db:"published"`
-	UpdatedAt   time.Time `db:"updated_at"`
-	CreatedAt   time.Time `db:"created_at"`
+	ID          uuid.UUID `db:"id" json:"id"`
+	UserID      uuid.UUID `db:"user_id" json:"user_id"`
+	Title       string    `db:"title" json:"title"`
+	Slug        string    `db:"slug" json:"slug"`
+	SubTitle    string    `db:"sub_title" json:"sub_title"`
+	Short       string    `db:"short" json:"short"`
+	PostContent string    `db:"post_content" json:"post_content"`
+	Digest      string    `db:"digest" json:"digest"`
+	Published   bool      `db:"published" json:"published"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 }
 
 // Image struct based on image table in database
 type Image struct {
-	ID        uuid.UUID `db:"id"`
-	UserID    uuid.UUID `db:"user_id"`
-	URL       string    `db:"url"`
-	Medium    string    `db:"medium"`
-	Small     string    `db:"small"`
-	Caption   string    `db:"caption"`
-	UpdatedAt time.Time `db:"updated_at"`
-	CreatedAt time.Time `db:"created_at"`
+	ID        uuid.UUID `db:"id" json:"id"`
+	UserID    uuid.UUID `db:"user_id" json:"user_id"`
+	URL       string    `db:"url" json:"url"`
+	Medium    string    `db:"medium" json:"medium"`
+	Small     string    `db:"small" json:"small"`
+	Caption   string    `db:"caption" json:"caption"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
 // Tag struct based on tag table in database
 type Tag struct {
-	ID   uuid.UUID `db:"id"`
-	Name string    `db:"name"`
-	Slug string    `db:"slug"`
+	ID   uuid.UUID `db:"id" json:"id"`
+	Name string    `db:"name" json:"name"`
+	Slug string    `db:"slug" json:"slug"`
 }
 
 ////////////////////
@@ -101,10 +101,10 @@ func (db *DB) UpdatePost(id uuid.UUID, user uuid.UUID, title string, slug string
 }
 
 // DeletePost deletes and returns the image from the database that matches the uuid
-func (db *DB) DeletePost(id uuid.UUID) (*Post, error) {
+func (db *DB) DeletePost(id uuid.UUID, user uuid.UUID) (*Post, error) {
 	p := new(Post)
-	sql := "DELETE FROM posts WHERE id = $1 RETURNING *"
-	err := db.Get(p, sql, id)
+	sql := "DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING *"
+	err := db.Get(p, sql, id, user)
 	return p, err
 }
 

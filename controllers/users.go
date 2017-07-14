@@ -28,7 +28,7 @@ type UserCustomClaim struct {
 type contextKey string
 
 func (c contextKey) String() string {
-	return "mirango-go/models context key" + string(c)
+	return "mirango-go controller context key" + string(c)
 }
 
 var (
@@ -59,7 +59,7 @@ func (env *Env) getUser(tokenString string, hmacSecret []byte) (uuid.UUID, error
 // UserCtx loads the user into the context if it exists
 func (env *Env) UserCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Context defaults to
+		// Context defaults to false for signed in
 		ctx := context.WithValue(r.Context(), contextSignedIn, false)
 		ctx = context.WithValue(ctx, contextAdmin, false)
 		cookie, err := r.Cookie("authentication")
@@ -74,6 +74,7 @@ func (env *Env) UserCtx(next http.Handler) http.Handler {
 		if err != nil {
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
+		// SignedIn is updated to true if it reaches this point and adds the user struct
 		ctx = context.WithValue(r.Context(), contextSignedIn, true)
 		ctx = context.WithValue(ctx, contextUser, user)
 		ctx = context.WithValue(ctx, contextAdmin, true)
