@@ -40,6 +40,19 @@ func (env *Env) CreatePost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p)
 }
 
+// GetPost if ID matches a post return a json post. If the post is unpublished
+// check if user is an admin otherwise return 404
+func (env *Env) GetPost(w http.ResponseWriter, r *http.Request) {
+}
+
+// GetAllPosts is an admin only function that returns all posts published or not
+func (env *Env) GetAllPosts(w http.ResponseWriter, r *http.Request) {
+}
+
+// GetAllPublishedPosts returns all published / public posts
+func (env *Env) GetAllPublishedPosts(w http.ResponseWriter, r *http.Request) {
+}
+
 // UpdatePost takes form data and a post ID to update stored information
 func (env *Env) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
