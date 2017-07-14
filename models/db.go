@@ -50,7 +50,7 @@ type Datastore interface {
 	DeleteImage(id uuid.UUID) (*Image, error)
 }
 
-// DB ...
+// DB holds the database access method (allows us to mock the database)
 type DB struct {
 	*sqlx.DB
 }

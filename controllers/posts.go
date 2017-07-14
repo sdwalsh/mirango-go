@@ -105,6 +105,7 @@ func (env *Env) GetPublishedPosts(w http.ResponseWriter, r *http.Request) {
 func (env *Env) GetUnpublishedPosts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := ctx.Value(contextUser).(*models.User)
+	// Just a double check - should we remove?
 	if user.Role != "ADMIN" {
 		w.WriteHeader(http.StatusForbidden)
 	}
