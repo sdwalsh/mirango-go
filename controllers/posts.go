@@ -43,14 +43,78 @@ func (env *Env) CreatePost(w http.ResponseWriter, r *http.Request) {
 // GetPost if ID matches a post return a json post. If the post is unpublished
 // check if user is an admin otherwise return 404
 func (env *Env) GetPost(w http.ResponseWriter, r *http.Request) {
+	// Grab the context to get the user
+	ctx := r.Context()
+	user := ctx.Value(contextUser).(*models.User)
+	id, err := uuid.Parse(chi.URLParam(r, "postID"))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	p, err := env.DB.FindPost(id)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	if p.Published == false && user.Role != "ADMIN" {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p)
 }
 
-// GetAllPosts is an admin only function that returns all posts published or not
-func (env *Env) GetAllPosts(w http.ResponseWriter, r *http.Request) {
+// GetPosts is an admin only function that returns posts
+// Query string s and e define which rows to query s defaults to 0 and e defaults to 10
+func (env *Env) GetPosts(w http.ResponseWriter, r *http.Request) {
+	start, err := strconv.Atoi(r.URL.Query().Get("s"))
+	if err != nil {
+		start = 0
+	}
+	end, err := strconv.Atoi(r.URL.Query().Get("e"))
+	if err != nil {
+		end = 10
+	}
+	p, err := env.DB.GetPosts(start, end)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p)
 }
 
-// GetAllPublishedPosts returns all published / public posts
-func (env *Env) GetAllPublishedPosts(w http.ResponseWriter, r *http.Request) {
+// GetPublishedPosts returns all published / public posts
+func (env *Env) GetPublishedPosts(w http.ResponseWriter, r *http.Request) {
+	start, err := strconv.Atoi(r.URL.Query().Get("s"))
+	if err != nil {
+		start = 0
+	}
+	end, err := strconv.Atoi(r.URL.Query().Get("e"))
+	if err != nil {
+		end = 10
+	}
+	p, err := env.DB.PublishedPosts(start, end)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p)
+}
+
+// GetUnpublishedPosts returns all published / public posts
+func (env *Env) GetUnpublishedPosts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := ctx.Value(contextUser).(*models.User)
+	if user.Role != "ADMIN" {
+		w.WriteHeader(http.StatusForbidden)
+	}
+	p, err := env.DB.UnpublishedPosts()
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p)
 }
 
 // UpdatePost takes form data and a post ID to update stored information
@@ -98,7 +162,5 @@ func (env *Env) DeletePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	// Send out deleted post
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }

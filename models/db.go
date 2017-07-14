@@ -34,9 +34,9 @@ type Datastore interface {
 	GetUserByID(user uuid.UUID) (*User, error)
 	GetUserByUname(uname string) (*User, error)
 	// Post Functions
-	PublishedPosts() (*[]Post, error)
+	PublishedPosts(start int, end int) (*[]Post, error)
 	UnpublishedPosts() (*[]Post, error)
-	AllPosts() (*[]Post, error)
+	GetPosts(start int, end int) (*[]Post, error)
 	FindPost(id uuid.UUID) (*Post, error)
 	FindPostsByUser(user uuid.UUID) (*[]Post, error)
 	InsertPost(user uuid.UUID, title string, slug string, subtitle string, short string, content string, digest string, published bool) (*Post, error)

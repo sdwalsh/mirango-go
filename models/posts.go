@@ -45,10 +45,11 @@ type Tag struct {
 ////////////////////
 
 // PublishedPosts returns all published posts in database
-func (db *DB) PublishedPosts() (*[]Post, error) {
+func (db *DB) PublishedPosts(start int, end int) (*[]Post, error) {
+	total := end - start
 	p := new([]Post)
-	sql := "SELECT * FROM posts WHERE published = true"
-	err := db.Get(p, sql)
+	sql := "SELECT * FROM posts WHERE published = true OFFSET $1 LIMIT $2"
+	err := db.Get(p, sql, start, total)
 	return p, err
 }
 
@@ -60,11 +61,12 @@ func (db *DB) UnpublishedPosts() (*[]Post, error) {
 	return p, err
 }
 
-// AllPosts returns all posts in database
-func (db *DB) AllPosts() (*[]Post, error) {
+// GetPosts returns all posts in database
+func (db *DB) GetPosts(start int, end int) (*[]Post, error) {
+	total := end - start
 	p := new([]Post)
-	sql := "SELECT * FROM posts"
-	err := db.Get(p, sql)
+	sql := "SELECT * FROM posts OFFSET $1 LIMIT $2"
+	err := db.Get(p, sql, start, total)
 	return p, err
 }
 
