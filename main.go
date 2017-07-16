@@ -10,15 +10,18 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/securecookie"
+	"github.com/jmoiron/sqlx"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/sdwalsh/mirango-go/controllers"
+	"github.com/sdwalsh/mirango-go/models"
 )
 
 // Configuration is the struct of all required environmental variables
 type Configuration struct {
-	DatabaseURL string
-	Hmac        string
-	Salt        string
-	Port        string
+	Database string
+	Hmac     string
+	Salt     string
+	Port     string
 }
 
 // Main sets up the server configuration and middleware and start the server
@@ -41,6 +44,21 @@ func main() {
 	hashKey := securecookie.GenerateRandomKey(64)
 	blockKey := securecookie.GenerateRandomKey(32)
 	s := securecookie.New(hashKey, blockKey)
+
+	post, err := sqlx.Connect("postgres", c.Database)
+	if err != nil {
+		log.Fatal("Cannot connect to database")
+	}
+	data := new(models.DB)
+	data.DB = post
+
+	// Pass around Env to routes
+	e := controllers.Env{
+		DB:   data,
+		S:    s,
+		Hmac: []byte(c.Hmac),
+		Salt: c.Salt,
+	}
 
 	// Create new chi router and add middleware
 	r := chi.NewRouter()
