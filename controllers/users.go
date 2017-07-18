@@ -64,15 +64,21 @@ func (env *Env) UserCtx(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, contextAdmin, false)
 		cookie, err := r.Cookie("authentication")
 		if err != nil {
+			env.log(r, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
+			return
 		}
 		ID, err := uuid.Parse(cookie.Value)
 		if err != nil {
+			env.log(r, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
+			return
 		}
 		user, err := env.DB.GetUserByID(ID)
 		if err != nil {
+			env.log(r, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
+			return
 		}
 		// SignedIn is updated to true if it reaches this point and adds the user struct
 		ctx = context.WithValue(r.Context(), contextSignedIn, true)
@@ -114,11 +120,15 @@ func (env *Env) Login(w http.ResponseWriter, r *http.Request) {
 	// Database call and bcrypt compare hashed passwords
 	u, err := env.DB.GetUserByUname(uname)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	err = bcrypt.CompareHashAndPassword(u.Digest, []byte(password+env.Salt))
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	// Generate new jwt with uuid claim and add cookie
@@ -171,13 +181,17 @@ func (env *Env) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	// Generate the hash if there is an error in hashing we'll return 500
 	digest, err := bcrypt.GenerateFromPassword([]byte(password+env.Salt), 10)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	// Ignore the user struct returned and report back 409 if error or 202 if ok
 	_, err = env.DB.InsertUser(user, digest, "MEMBER", email, gpg)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusConflict)
+		return
 	}
 	w.WriteHeader(http.StatusAccepted)
 }

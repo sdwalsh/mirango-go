@@ -28,11 +28,15 @@ func (env *Env) CreatePost(w http.ResponseWriter, r *http.Request) {
 	// published must be parsed into a bool
 	published, err := strconv.ParseBool(s.Sanitize(r.FormValue("published")))
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	p, err := env.DB.InsertPost(user.ID, title, slug, subtitle, short, content, digest, published)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	// Send out created post
 	w.Header().Set("Content-Type", "application/json")
@@ -48,11 +52,15 @@ func (env *Env) GetPost(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Value(contextUser).(*models.User)
 	id, err := uuid.Parse(chi.URLParam(r, "postID"))
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	p, err := env.DB.FindPost(id)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	if p.Published == false && user.Role != "ADMIN" {
 		w.WriteHeader(http.StatusNotFound)
@@ -75,7 +83,9 @@ func (env *Env) GetPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := env.DB.GetPosts(start, end)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -94,7 +104,9 @@ func (env *Env) GetPublishedPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := env.DB.PublishedPosts(start, end)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -111,7 +123,9 @@ func (env *Env) GetUnpublishedPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := env.DB.UnpublishedPosts()
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -126,7 +140,9 @@ func (env *Env) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	// post ID needs to be sanitized and parsed - return if error parsing
 	id, err := uuid.Parse(s.Sanitize(r.FormValue("id")))
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	title := s.Sanitize(r.FormValue("title"))
 	slug := s.Sanitize(r.FormValue("slug"))
@@ -137,11 +153,15 @@ func (env *Env) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	// published must be parsed into a bool
 	published, err := strconv.ParseBool(s.Sanitize(r.FormValue("published")))
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	p, err := env.DB.UpdatePost(id, user.ID, title, slug, subtitle, short, content, digest, published)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	// Send out updated post
 	w.Header().Set("Content-Type", "application/json")
@@ -156,12 +176,16 @@ func (env *Env) DeletePost(w http.ResponseWriter, r *http.Request) {
 	user := ctx.Value(contextUser).(*models.User)
 	id, err := uuid.Parse(chi.URLParam(r, "postID"))
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	// Ignored returned post since it was deleted
 	_, err = env.DB.DeletePost(id, user.ID)
 	if err != nil {
+		env.log(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }

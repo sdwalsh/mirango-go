@@ -66,7 +66,7 @@ func (db *DB) GetPosts(start int, end int) (*[]Post, error) {
 	total := end - start
 	p := new([]Post)
 	sql := "SELECT * FROM posts OFFSET $1 LIMIT $2"
-	err := db.Get(p, sql, start, total)
+	err := db.Select(p, sql, start, total)
 	return p, err
 }
 
