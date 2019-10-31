@@ -1,5 +1,7 @@
 # mirango-go #
 
+## Project is no longer maintained
+
 mirango-go is a small and simple content management system for blogs built with Go, [chi](https://github.com/go-chi/chi), and [pq](https://github.com/lib/pq).
 
 This repository houses the backend of mirango.io (RESTful API)
